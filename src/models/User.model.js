@@ -4,9 +4,9 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
   {
-    vendorId: {
+    tenantId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Vendor",
+      ref: "Tenant",
       required: function () {
         return this.role !== "super_admin";
       },
@@ -28,7 +28,6 @@ const userSchema = new mongoose.Schema(
     passwordHash: {
       type: String,
       required: true,
-      // hashing (bcrypt) happens in Service layer, not here
     },
     role: {
       type: String,
