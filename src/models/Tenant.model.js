@@ -31,7 +31,7 @@ const tenantSchema = new mongoose.Schema(
     },
     plan: {
       type: String,
-      enum: ["free", "starter", "pro"],
+      enum: ["1-dollar", "pro", "business"],
       default: "free",
     },
     isActive: {
