@@ -23,11 +23,11 @@ const tenantSchema = new mongoose.Schema(
     },
     whatsappToken: {
       type: String,
-      required: true,
+      default: null,
     },
     geminiApiKey: {
       type: String,
-      required: true,
+      default: null,
     },
     plan: {
       type: String,
