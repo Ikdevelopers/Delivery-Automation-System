@@ -8,3 +8,7 @@ export const createUser = async (data, session) => {
 export const findUserByEmail = async (email) => {
     return User.findOne({ email });
 };
+
+export const findUserById = async (userId) => {
+    return User.findById(userId).select("-passwordHash")
+};
