@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { ApiError } from "../utils/ApiError.util.js";
+import ApiError from "../utils/ApiError.util.js";
 import { findSessionByToken } from "../repositories/session.repository.js";
 import { findUserById } from "../repositories/user.repository.js";
 
