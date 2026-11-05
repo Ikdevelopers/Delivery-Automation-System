@@ -6,6 +6,7 @@ import ApiError from "../utils/ApiError.util.js";
 import { createTenant, findTenantBySlug } from "../repositories/tenant.repository.js";
 import { createUser, findUserByEmail } from "../repositories/user.repository.js";
 import { createSession } from "../repositories/session.repository.js";
+import { deleteAllSessionsByUserId, deleteSessionByToken } from "../repositories/session.repository.js";
 
 const generateUniqueSlug = async (name) => {
     const baseSlug = slugify(name, { lower: true, strict: true });
@@ -61,15 +62,15 @@ export const registerTenantAdmin = async ({
         user.passwordHash = undefined;
 
         //giving response
-        return {tenant, user};
+        return { tenant, user };
 
     }
-    catch(error){
+    catch (error) {
         if (session.inTransaction()) {
             await session.abortTransaction();
         }
         throw error;
-    }finally{
+    } finally {
         await session.endSession()
     }
 
@@ -112,4 +113,13 @@ export const loginUser = async ({ email, password, userAgent, ipAddress }) => {
     user.passwordHash = undefined;
 
     return { user, token };
+};
+
+
+export const logoutUser = async (token) => {
+    await deleteSessionByToken(token);
+};
+
+export const logoutAllDevices = async (userId) => {
+    await deleteAllSessionsByUserId(userId);
 };
