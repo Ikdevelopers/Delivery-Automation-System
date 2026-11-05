@@ -14,5 +14,5 @@ export const deleteSessionByToken = async (token) => {
 };
 
 export const deleteAllSessionsByUserId = async (userId) => {
-    return Session.findOne({userId})
+    return Session.deleteMany({userId})
 };
