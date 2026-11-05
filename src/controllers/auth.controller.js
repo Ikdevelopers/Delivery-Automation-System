@@ -1,4 +1,4 @@
-import { registerTenantAdmin, loginUser } from "../services/auth.service.js";
+import { registerTenantAdmin, loginUser, logoutUser, logoutAllDevices } from "../services/auth.service.js";
 import { ApiResponse } from "../utils/ApiResponse.util.js";
 import { asyncHandler } from "../utils/asyncHandler.util.js";
 
@@ -42,4 +42,32 @@ export const login = asyncHandler(async (req, res) => {
     .status(200)
     .cookie("token", token, cookieOptions)
     .json(new ApiResponse(200, { user }, "Login successful"));
+});
+
+// 1. logout — this device
+export const logout = asyncHandler(async (req, res) => {
+    // FILL: get token from req.cookies.token
+    const token = req.cookies?.token;
+    // FILL: call logoutUser(token) from service
+    await logoutUser(token);
+    // FILL: clear the cookie using res.clearCookie("token")
+    res.clearCookie("token");
+    // FILL: return 200 response "Logged out successfully"
+    return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Logged out successfully"));
+});
+
+// 2. logoutAll — all devices
+export const logoutAll = asyncHandler(async (req, res) => {
+    // FILL: get userId from req.user (middleware ne attach kiya tha)
+    const userId = req.user._id;
+    // FILL: call logoutAllDevices(userId) from service
+    await logoutAllDevices(userId);
+    // FILL: clear the cookie
+    res.clearCookie("token");
+    // FILL: return 200 response "Logged out from all devices"
+    return res
+    .status(200)
+    .json(new ApiResponse(200, null, "Logged out from all devices"))
 });
