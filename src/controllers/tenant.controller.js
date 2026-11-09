@@ -1,0 +1,1 @@
+export const tempController = (req, res) => res.json({ message: "ok" });
