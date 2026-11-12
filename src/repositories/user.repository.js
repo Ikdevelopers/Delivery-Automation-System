@@ -6,9 +6,9 @@ export const createUser = async (data, session) => {
 };
 
 export const findUserByEmail = async (email) => {
-    return User.findOne({ email });
+    return await User.findOne({ email });
 };
 
 export const findUserById = async (userId) => {
-    return User.findById(userId).select("-passwordHash")
+    return await User.findById(userId).select("-passwordHash");
 };
