@@ -97,6 +97,7 @@ export const loginUser = async ({ email, password, userAgent, ipAddress }) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 
     // Step 4: session expiry = 7 days from now (matches the JWT's own expiry)
+    // const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     // Step 5: save this login as a Session document — no transaction needed,
