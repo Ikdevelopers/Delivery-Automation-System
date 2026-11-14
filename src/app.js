@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from "./routes/auth.routes.js"
 import tenantRouter from "./routes/tenant.routes.js"
+import messageQueue from "./queues/notification.queue.js"
 
 const app = express();
 
@@ -14,6 +15,24 @@ app.use(cookieParser());
 //custom middlewares
 app.use("/api/auth", authRouter);
 app.use("/api/tenants", tenantRouter);
+
+
+//Queue middellwares
+app.post("/message-notify", async (req, res) => {
+    const job = await messageQueue.add("add-message-to-queue", {
+        to: req.body.to,
+        name: req.body.name || "Learner",
+    }, {
+        attempts: 3,
+        backoff: {
+            type: "exponential",
+            delay: 1000,
+        },
+    });
+
+    res.status(202).json({ jobId: job.id });
+});
+
 
 app.get('/health', (_req, res) => {
     res.status(200).json({ status: 'ok' });
