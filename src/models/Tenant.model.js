@@ -21,6 +21,11 @@ const tenantSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    phoneNumberId: {
+      type: String,
+      default: null,
+      trim: true,
+    },
     whatsappToken: {
       type: String,
       default: null,
