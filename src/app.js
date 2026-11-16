@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import authRouter from "./routes/auth.routes.js"
 import tenantRouter from "./routes/tenant.routes.js"
+import webhookRouter from "./routes/webhook.routes.js"
 import messageQueue from "./queues/notification.queue.js"
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(cookieParser());
 //custom middlewares
 app.use("/api/auth", authRouter);
 app.use("/api/tenants", tenantRouter);
+app.use("/api/webhooks", webhookRouter);
 
 
 //Queue middellwares

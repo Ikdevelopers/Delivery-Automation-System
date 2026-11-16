@@ -5,10 +5,7 @@ import { connectRedis } from "../config/redis.js"; // adjust path if needed
 
 export const checkDuplicateMessage = async (req, res, next) => {
   try {
-    // Meta's real nesting: entry -> changes -> value -> (messages | statuses)
-    // "changes" was the array you skipped earlier
-
-    const value = req.body?.entry?.[0]?.changes?.[0]?.value;
+    const value = req.webhookData?.value;
 
     // incoming customer message has an id under messages[0].id
     // outgoing status updates (sent/delivered/read) have id under statuses[0].id
