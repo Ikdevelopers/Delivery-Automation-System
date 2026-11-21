@@ -7,6 +7,7 @@ import {
     pushMessageToSession,
     saveSession,
 } from "../services/session.service.js";
+import { getActiveMenuForTenant } from "../services/menu.service.js";
 import { classifyIntent } from "../services/llm.service.js";
 
 // Create a BullMQ worker that processes jobs from the "webhook" queue.
@@ -45,8 +46,9 @@ const worker = new Worker(
 
         // Classify the new message using previous history and the tenant's business info.
         // The current message is passed separately, so it is not added to history until after classification.
-        // TODO Day 4: fetch tenant's active MenuItems from DB and pass here
-        const intent = await classifyIntent(text, session.history, tenant, []);
+        const activeMenu = await getActiveMenuForTenant(tenant._id.toString());
+        
+        const intent = await classifyIntent(text, session.history, tenant, activeMenu);
 
         // Add the customer's message to the session for future turns.
         pushMessageToSession(session, {
