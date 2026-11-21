@@ -25,6 +25,6 @@ export const deleteMenuItem = async (menuItemId) => {
 export const getMenuItemsByVendorIds = async (vendorIds) => {
     return await Menu.find({
         vendorId: { $in: vendorIds },
-        isActive: true,
+        isAvailable: true,
     });
 };
