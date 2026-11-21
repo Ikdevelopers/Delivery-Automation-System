@@ -7,8 +7,11 @@ import {
     buildSystemInstruction,
 } from "../utils/botPrompt.js";
 
-const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const model = "gemini-2.5-flash";
+const genAI = new GoogleGenAI({
+    apiKey: process.env.GEMINI_API_KEY,
+    apiVersion: "v1beta",
+});
+const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 export async function classifyIntent(message, history = [], tenant = {}, menuItems = []) {
     // Lazy-build + memoize systemInstruction:
@@ -113,21 +116,37 @@ export async function createGeminiCache(systemInstruction, menu) {
 
     // Gemini's cache-create endpoint — NOT generateContent. systemInstruction
     // stays a separate field (not mixed into contents), same as a normal call.
-    const cache = await genAI.caches.create({
-        model,
-        config: {
-            contents: [
-                {
-                    role: "user",
-                    parts: [{ text: cacheContent }],
-                },
-            ],
-            systemInstruction,
-            ttl: "86400s", // Duration string format required by the API — plain "86400" is rejected
-        },
-    });
+    try {
+        const cache = await genAI.caches.create({
+            model,
+            config: {
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{ text: cacheContent }],
+                    },
+                ],
+                systemInstruction,
+                ttl: "86400s", // Duration string format required by the API — plain "86400" is rejected
+            },
+        });
 
-    // The SDK response is a full cache object; we only need its reference
-    // name/handle for future calls — that's what gets stored in Redis.
-    return cache.name;
+        // The SDK response is a full cache object; we only need its reference
+        // name/handle for future calls — that's what gets stored in Redis.
+        return cache.name;
+    } catch (err) {
+        if (
+            err?.message?.includes("too small") ||
+            err?.status === 400 ||
+            err?.status === 429 ||
+            err?.message?.includes("limit exceeded") ||
+            err?.message?.includes("FreeTier")
+        ) {
+            console.warn(
+                `[Gemini cache] Skipping cache creation (${err?.status || "FreeTier limit"}): ${err?.message || "unsupported/free tier limit"}. Falling back to inline prompt.`
+            );
+            return null;
+        }
+        throw err;
+    }
 }

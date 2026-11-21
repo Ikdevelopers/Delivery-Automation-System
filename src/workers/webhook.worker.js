@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Worker } from "bullmq";
 import { connection } from "../config/redis.js";
+import { connectDb } from "../config/db.js"; // match your actual export/path from config/db.js
 import Tenant from "../models/Tenant.model.js";
 import {
     getOrCreateSession,
@@ -11,6 +12,7 @@ import { getActiveMenuForTenant } from "../services/menu.service.js";
 import { classifyIntent } from "../services/llm.service.js";
 
 // Create a BullMQ worker that processes jobs from the "webhook" queue.
+await connectDb();
 const worker = new Worker(
     "webhook",
     async (job) => {
