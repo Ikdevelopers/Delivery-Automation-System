@@ -1,7 +1,7 @@
 import Vendor from "../models/Vendor.model.js";
 
 export const getVendorsByTenant = async (tenantId) => {
-    return await Vendor.find({tenantId})
+    return await Vendor.find({ tenantId });
 };
 
 export const createVendor = async (data, session) => {
@@ -15,9 +15,9 @@ export const findVendorById = async (vendorId) => {
 };
 
 export const updateVendor = async (vendorId, data) => {
-return await Vendor.findByIdAndUpdate(vendorId, data, { new: true });
+    return await Vendor.findByIdAndUpdate(vendorId, data, { new: true });
 };
 
 export const deleteVendor = async (vendorId) => {
-return await Vendor.findByIdAndDelete(vendorId);
+    return await Vendor.findByIdAndDelete(vendorId);
 };

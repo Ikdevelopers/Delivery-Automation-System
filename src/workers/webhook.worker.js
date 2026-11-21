@@ -46,7 +46,7 @@ const worker = new Worker(
 
         // Classify the new message using previous history and the tenant's business info.
         // The current message is passed separately, so it is not added to history until after classification.
-        const activeMenu = await getActiveMenuForTenant(tenant._id.toString());
+        const activeMenu = await getActiveMenuForTenant(tenant._id);
         
         const intent = await classifyIntent(text, session.history, tenant, activeMenu);
 
