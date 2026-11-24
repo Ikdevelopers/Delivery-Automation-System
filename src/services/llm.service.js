@@ -11,7 +11,40 @@ const genAI = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
     apiVersion: "v1beta",
 });
+
+// The model and response schema are fixed at module initialization so every
+// classification request uses the same structured JSON contract.
 const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const responseSchema = {
+    type: "OBJECT",
+    properties: {
+        status: { type: "STRING", enum: BOT_STATUSES },
+        items: {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    name: { type: "STRING" },
+                    quantity: { type: "NUMBER", nullable: true },
+                    unit: { type: "STRING", nullable: true },
+                    isAvailable: { type: "BOOLEAN" },
+                },
+                required: ["name", "quantity", "unit", "isAvailable"],
+            },
+        },
+        missing: {
+            type: "STRING",
+            enum: ["quantity", "item_detail"],
+            nullable: true,
+        },
+        language: {
+            type: "STRING",
+            enum: ["roman_urdu", "urdu", "english"],
+        },
+        replyMessage: { type: "STRING", nullable: true },
+    },
+    required: ["status", "items", "missing", "language", "replyMessage"],
+};
 
 export async function classifyIntent(message, history = [], tenant = {}, menuItems = []) {
     // Lazy-build + memoize systemInstruction:
@@ -61,6 +94,7 @@ export async function classifyIntent(message, history = [], tenant = {}, menuIte
                 ? { cachedContent: cacheHandle }
                 : { systemInstruction: getSystemInstruction() }),
             responseMimeType: "application/json",
+            responseSchema,
         },
     });
 
@@ -77,7 +111,7 @@ export async function classifyIntent(message, history = [], tenant = {}, menuIte
             items: [],
             missing: null,
             language: "english",
-            replyMessage: null,
+            replyMessage: "Sorry, I didn't understand that. Can you please repeat?",
         };
     }
 
@@ -89,10 +123,12 @@ export async function classifyIntent(message, history = [], tenant = {}, menuIte
             items: [],
             missing: null,
             language: "english",
-            replyMessage: null,
+            replyMessage: "Sorry, I didn't understand that. Can you please repeat?",
         };
     }
 
+    if (!Array.isArray(parsed.items)) parsed.items = [];
+    
     // Only certain statuses are expected to carry a direct reply message;
     // strip replyMessage for any status where it isn't meaningful.
     if (!GEMINI_REPLY_STATUSES.includes(parsed.status)) {
