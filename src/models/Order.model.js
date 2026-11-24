@@ -26,15 +26,16 @@ const orderSchema = new mongoose.Schema(
           },
           items: [
             {
-              menuItemId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "MenuItem",
+              itemName: {
+                type: String,
                 required: true,
+                // Snapshot of the menu item name, unaffected by later menu changes.
               },
               quantity: {
                 type: Number,
                 required: true,
-                min: 1,
+                // Allow fractional units such as 0.5 kg or 0.25 litre.
+                min: 0.001,
               },
               priceAtOrderTime: {
                 type: Number,
