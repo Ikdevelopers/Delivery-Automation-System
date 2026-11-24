@@ -35,7 +35,7 @@ if redis.call("GET", KEYS[1]) == ARGV[1] then
  * - Returns null if no handle could be obtained — caller should treat this
  *   as "proceed without cache, send full instructions+menu inline this once."
  */
- async function getOrCreateCacheHandle(tenantId, getInstructions, menu) {
+export async function getOrCreateCacheHandle(tenantId, getInstructions, menu) {
     const redis = await connectRedis();
 
     // handleKey = the real payload: the reusable Gemini cache reference string
@@ -104,7 +104,5 @@ if redis.call("GET", KEYS[1]) == ARGV[1] then
 
 export async function invalidateGeminiCache(tenantId) {
     const redis = await connectRedis();
-    await redis.del(`gemini_cache:${tenantId}`)
+    await redis.del(`gemini_cache:${tenantId}`);
 }
-
-export { getOrCreateCacheHandle };
