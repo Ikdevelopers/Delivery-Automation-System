@@ -15,6 +15,12 @@ const vendorSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    shortCode: {
+      type: String,
+      trim: true,
+      uppercase: true,
+      index: true,
+    },
     phone: {
       type: String,
       trim: true,
