@@ -21,3 +21,15 @@ export const updateVendor = async (vendorId, data) => {
 export const deleteVendor = async (vendorId) => {
     return await Vendor.findByIdAndDelete(vendorId);
 };
+
+export const checkbaseCode = async (baseCode) => {
+    if (typeof baseCode !== "string" || !baseCode.trim()) {
+        return [];
+    }
+
+    const escapedBaseCode = baseCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    return await Vendor.find({
+        shortCode: { $regex: `^${escapedBaseCode}`, $options: "i" }
+    }).select("shortCode").lean();
+};
