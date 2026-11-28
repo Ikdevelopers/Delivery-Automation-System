@@ -5,7 +5,7 @@ export const getVendorsByTenant = async (tenantId) => {
 };
 
 export const createVendor = async (data, session) => {
-    const [vendor] = await Vendor.create([data], { session } )
+    const [vendor] = await Vendor.create([data], { session });
     return vendor;
 };
 
@@ -32,4 +32,12 @@ export const checkbaseCode = async (baseCode) => {
     return await Vendor.find({
         shortCode: { $regex: `^${escapedBaseCode}`, $options: "i" }
     }).select("shortCode").lean();
+};
+
+export const getVenodrIds = async (subOrders) => {
+    // Step 1: extract all vendorIds from subOrders
+    const vendorIds = subOrders.map(({ vendorId }) => vendorId);
+    // Step 2: fetch all vendors in one DB call
+    const vendors = await Vendor.find({ _id: { $in: vendorIds } }).select("phone shortCode").lean();
+    return vendors;
 };
