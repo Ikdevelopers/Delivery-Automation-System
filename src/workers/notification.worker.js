@@ -7,6 +7,19 @@ const worker = new Worker(
     "notification",
     async (job) => {
         console.log("Processing notification job:", job.id, job.data);
+
+        switch (job.name) {
+            case "vendor-notify":
+                const { phone, shortCode, items, orderId } = job?.data;
+                console.log(`Phone: ${phone}, \n Shor-Code: ${shortCode}, \n items: ${items.map((item) => JSON.stringify(item)).join("\n")}, Id: ${orderId}`);
+                break;
+
+            default:
+                console.warn(`Unknown job type: ${job.name}`);
+                break;
+        }
+
+
         // TODO: later — send WhatsApp message here
         return { processed: true };
     },
