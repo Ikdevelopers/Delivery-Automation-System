@@ -1,4 +1,6 @@
 import { createOrder } from "../repositories/order.repository.js";
+import { notifyVendors } from "./vendorNotification.service.js";
+import { fuzzyMatchItem } from "../utils/fuzzyMatch.js";
 
 // Convert the active menu into a lookup table for fast price and vendor access.
 export function buildMenuMap(activeMenu) {
@@ -14,13 +16,20 @@ export function buildMenuMap(activeMenu) {
   return menuMap;
 }
 
-function groupItemsByVendor(geminiItems, menuMap) {
+function groupItemsByVendor(geminiItems, menuMap, activeMenu) {
   const vendorGroups = {}; // key: vendorId (string), value: array of items
 
   geminiItems.forEach((item) => {
     if (!item.isAvailable) return; // skip unavailable items
 
-    const menuData = menuMap[item.name];
+    let menuData = menuMap[item.name];
+    if (!menuData) {
+      const fuzzyMatch = fuzzyMatchItem(item.name, activeMenu);
+      if (fuzzyMatch) {
+        menuData = menuMap[fuzzyMatch.item.name];
+      }
+    }
+
     if (!menuData) {
       throw new Error(`Available item "${item.name}" was not found in the active menu.`);
     }
@@ -50,17 +59,20 @@ export const createOrderFromIntent = async (intent, tenant, customerId, activeMe
   }
 
   const menuMap = buildMenuMap(activeMenu);
-  const subOrders = groupItemsByVendor(intent.items, menuMap);
+  const subOrders = groupItemsByVendor(intent.items, menuMap, activeMenu);
 
   if (subOrders.length === 0) {
     throw new Error("Cannot create an order without available menu items.");
   }
 
-  return await createOrder({
+  const order = await createOrder({
     tenantId: tenant._id,
     customerId,
     subOrders,
   });
+
+  await notifyVendors(order.subOrders, order._id);
+  return order;
 };
 
 
@@ -89,4 +101,17 @@ export const calculateCartTotal = (cartItems, menuMap) => {
   const total = pricedItems.reduce((sum, item) => sum + item.lineTotal, 0);
 
   return { items: pricedItems, total };
+};
+
+
+export const sortItemsByQuantity = (items) => {
+  // Original array ko modify hone se bachane ke liye copy banai
+  const sortedItems = [...items];
+
+  // sort() har item ki quantity compare karta hai
+  // b.quantity - a.quantity karne se bade number pehle aate hain
+  sortedItems.sort((a, b) => b.quantity - a.quantity);
+
+  // Quantity descending order wala array return kiya
+  return sortedItems;
 };
